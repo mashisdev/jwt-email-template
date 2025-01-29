@@ -1,4 +1,4 @@
-# Noteapp API w/ JWT project + Email verification + Swagger docs
+# Note API w/ JWT project + Email verification + Swagger docs
 
 ### Dependencies:
 

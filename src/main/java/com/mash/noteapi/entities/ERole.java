@@ -1,4 +1,4 @@
-package com.mash.noteapp.entities;
+package com.mash.noteapi.entities;
 
 public enum ERole {
     ROLE_USER,

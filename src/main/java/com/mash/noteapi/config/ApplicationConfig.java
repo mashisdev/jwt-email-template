@@ -1,6 +1,6 @@
-package com.mash.noteapp.config;
+package com.mash.noteapi.config;
 
-import com.mash.noteapp.repositories.UserRepository;
+import com.mash.noteapi.repositories.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -40,8 +40,8 @@ public class ApplicationConfig {
 
     @Bean
     public UserDetailsService userDetailService() {
-        return username -> userRepository.findByUsername(username)
-                .orElseThrow(()-> new UsernameNotFoundException("User not found: " + username));
+        return email -> userRepository.findByEmail(email)
+                .orElseThrow(()-> new UsernameNotFoundException("User not found"));
     }
 
 }

@@ -1,4 +1,4 @@
-package com.mash.noteapp.dtos;
+package com.mash.noteapi.dtos;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;

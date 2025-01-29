@@ -1,6 +1,7 @@
-package com.mash.noteapp.config;
+package com.mash.noteapi.config;
+import com.mash.noteapi.services.JwtService;
 
-import com.mash.noteapp.services.JwtService;
+
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;

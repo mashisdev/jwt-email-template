@@ -1,11 +1,13 @@
-package com.mash.noteapp.repositories;
+package com.mash.noteapi.repositories;
 
-import com.mash.noteapp.entities.User;
+import com.mash.noteapi.entities.User;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.stereotype.Repository;
 
 import java.util.Optional;
 
+@Repository
 public interface UserRepository extends JpaRepository<User,Integer> {
-    Optional<User> findByUsername(String username);
+    Optional<User> findByEmail(String email);
     Optional<User> findByVerificationCode(String verificationCode);
 }
