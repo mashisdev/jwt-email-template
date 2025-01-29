@@ -24,18 +24,6 @@ public class AuthenticationService {
     private final AuthenticationManager authenticationManager;
     private final EmailService emailService;
 
-//    public AuthenticationService(
-//            UserRepository userRepository,
-//            AuthenticationManager authenticationManager,
-//            PasswordEncoder passwordEncoder,
-//            EmailService emailService
-//    ) {
-//        this.authenticationManager = authenticationManager;
-//        this.userRepository = userRepository;
-//        this.passwordEncoder = passwordEncoder;
-//        this.emailService = emailService;
-//    }
-
     public User signup(RegisterRequestDto input) {
         User user = new User(input.getUsername(), input.getEmail(), passwordEncoder.encode(input.getPassword()));
         user.setVerificationCode(generateVerificationCode());
