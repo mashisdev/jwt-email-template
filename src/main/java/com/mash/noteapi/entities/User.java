@@ -1,5 +1,7 @@
 package com.mash.noteapi.entities;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.persistence.*;
 import lombok.*;
 import org.springframework.security.core.GrantedAuthority;
@@ -10,6 +12,7 @@ import java.time.LocalDateTime;
 import java.util.Collection;
 import java.util.List;
 
+@JsonIgnoreProperties({"id", "password", "verificationCode"})
 @Data
 @Entity
 @Table(name = "users")
