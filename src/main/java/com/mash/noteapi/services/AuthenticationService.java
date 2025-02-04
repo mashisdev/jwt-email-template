@@ -4,6 +4,10 @@ import com.mash.noteapi.dtos.LoginRequestDto;
 import com.mash.noteapi.dtos.RegisterRequestDto;
 import com.mash.noteapi.dtos.VerifyRequestDto;
 import com.mash.noteapi.entities.User;
+import com.mash.noteapi.exceptions.AccountNotVerifiedException;
+import com.mash.noteapi.exceptions.EmailAlreadyExistsException;
+import com.mash.noteapi.exceptions.UsernameAlreadyExistsException;
+import com.mash.noteapi.exceptions.WrongEmailOrPasswordException;
 import com.mash.noteapi.repositories.UserRepository;
 import jakarta.mail.MessagingException;
 import lombok.RequiredArgsConstructor;
@@ -25,6 +29,15 @@ public class AuthenticationService {
     private final EmailService emailService;
 
     public User signup(RegisterRequestDto input) {
+
+        if(userRepository.findByEmail(input.getEmail()).isPresent()){
+            throw new EmailAlreadyExistsException("Email is already in use");
+        }
+
+        if (userRepository.findByUsername(input.getUsername()).isPresent()) {
+            throw new UsernameAlreadyExistsException("Username is already in use");
+        }
+
         User user = new User(input.getUsername(), input.getEmail(), passwordEncoder.encode(input.getPassword()));
         user.setVerificationCode(generateVerificationCode());
         user.setVerificationCodeExpiresAt(LocalDateTime.now().plusMinutes(30));
@@ -34,12 +47,18 @@ public class AuthenticationService {
     }
 
     public User authenticate(LoginRequestDto input) {
+
         User user = userRepository.findByEmail(input.getEmail())
-                .orElseThrow(() -> new RuntimeException("User not found"));
+                .orElseThrow(() -> new WrongEmailOrPasswordException("Wrong email or password"));
+
+        if (!passwordEncoder.matches(input.getPassword(), user.getPassword())) {
+            throw new WrongEmailOrPasswordException("Wrong email or password");
+        }
 
         if (!user.isEnabled()) {
-            throw new RuntimeException("Account not verified. Please verify your account.");
+            throw new AccountNotVerifiedException("Account not verified. Please verify your account.");
         }
+
         authenticationManager.authenticate(
                 new UsernamePasswordAuthenticationToken(
                         input.getEmail(),
