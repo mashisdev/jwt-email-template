@@ -4,15 +4,16 @@ import com.mash.noteapi.dtos.LoginRequestDto;
 import com.mash.noteapi.dtos.RegisterRequestDto;
 import com.mash.noteapi.dtos.VerifyRequestDto;
 import com.mash.noteapi.entities.User;
-import com.mash.noteapi.exceptions.AccountNotVerifiedException;
-import com.mash.noteapi.exceptions.EmailAlreadyExistsException;
-import com.mash.noteapi.exceptions.UsernameAlreadyExistsException;
-import com.mash.noteapi.exceptions.WrongEmailOrPasswordException;
+import com.mash.noteapi.exceptions.auth.AccountNotVerifiedException;
+import com.mash.noteapi.exceptions.auth.EmailAlreadyExistsException;
+import com.mash.noteapi.exceptions.auth.UsernameAlreadyExistsException;
+import com.mash.noteapi.exceptions.auth.WrongEmailOrPasswordException;
 import com.mash.noteapi.repositories.UserRepository;
 import jakarta.mail.MessagingException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -28,13 +29,15 @@ public class AuthenticationService {
     private final AuthenticationManager authenticationManager;
     private final EmailService emailService;
 
+    // User registration and authentication
+
     public User signup(RegisterRequestDto input) {
 
-        if(userRepository.findByEmail(input.getEmail()).isPresent()){
+        if(userRepository.existsByEmail(input.getEmail())){
             throw new EmailAlreadyExistsException("Email is already in use");
         }
 
-        if (userRepository.findByUsername(input.getUsername()).isPresent()) {
+        if (userRepository.existsByUsername(input.getUsername())) {
             throw new UsernameAlreadyExistsException("Username is already in use");
         }
 
@@ -68,6 +71,8 @@ public class AuthenticationService {
 
         return user;
     }
+
+    // User verification
 
     public void verifyUser(VerifyRequestDto input) {
         Optional<User> optionalUser = userRepository.findByEmail(input.getEmail());
@@ -104,7 +109,6 @@ public class AuthenticationService {
             throw new RuntimeException("User not found");
         }
     }
-
     private void sendVerificationEmail(User user) {
         String subject = "Note API Account Verification";
         String verificationCode = "VERIFICATION CODE " + user.getVerificationCode();

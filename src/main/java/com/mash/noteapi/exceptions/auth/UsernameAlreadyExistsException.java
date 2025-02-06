@@ -1,4 +1,4 @@
-package com.mash.noteapi.exceptions;
+package com.mash.noteapi.exceptions.auth;
 
 public class UsernameAlreadyExistsException extends RuntimeException {
     public UsernameAlreadyExistsException(String message) {

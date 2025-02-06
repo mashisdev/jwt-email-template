@@ -1,5 +1,6 @@
 package com.mash.noteapi.exceptions;
 
+import com.mash.noteapi.exceptions.auth.*;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.FieldError;
@@ -27,7 +28,7 @@ public class GlobalExceptionHandler {
     // Login
     @ExceptionHandler(WrongEmailOrPasswordException.class)
     public ResponseEntity<Map<String, String>> handleUserNotFound(WrongEmailOrPasswordException ex) {
-        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(Collections.singletonMap("user", ex.getMessage()));
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(Collections.singletonMap("user", ex.getMessage()));
     }
     @ExceptionHandler(AccountNotVerifiedException.class)
     public ResponseEntity<Map<String, String>> handleAccountNotVerified(AccountNotVerifiedException ex) {

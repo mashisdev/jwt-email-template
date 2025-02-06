@@ -31,13 +31,6 @@ public class User implements UserDetails {
     @Column(nullable = false)
     private String password;
 
-//    @Enumerated(EnumType.STRING)
-//    private ERole role;
-//
-//    @Override
-//    public Collection<? extends GrantedAuthority> getAuthorities() {
-//        return List.of(new SimpleGrantedAuthority((role.name())));
-//    }
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
         return List.of();
