@@ -1,6 +1,6 @@
 package com.mashisdev.jwtemail.services;
 
-import com.mashisdev.jwtemail.entities.User;
+import com.mashisdev.jwtemail.model.User;
 import org.springframework.stereotype.Service;
 
 import java.util.Optional;

@@ -1,18 +1,16 @@
-package com.mashisdev.jwtemail.entities;
+package com.mashisdev.jwtemail.model;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.persistence.*;
 import lombok.*;
 import org.springframework.security.core.GrantedAuthority;
-import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
 import java.time.LocalDateTime;
 import java.util.Collection;
 import java.util.List;
 
-@JsonIgnoreProperties({"id", "password", "verificationCode"})
+@JsonIgnoreProperties({"id", "password", "verificationCode", "accountNonExpired", "accountNonLocked", "credentialsNonExpired"})
 @Data
 @Entity
 @Table(name = "users")
@@ -29,6 +27,12 @@ public class User implements UserDetails {
     private String email;
 
     @Column(nullable = false)
+    private String firstname;
+
+    @Column(nullable = false)
+    private String lastname;
+
+    @Column(nullable = false)
     private String password;
 
     @Override
@@ -36,35 +40,35 @@ public class User implements UserDetails {
         return List.of();
     }
 
+    // Email verification
+    private boolean enabled;
     @Column(name = "verification_code")
-    private String verificationCode;
+    private Integer verificationCode;
     @Column(name = "verification_expiration")
     private LocalDateTime verificationCodeExpiresAt;
-    private boolean enabled;
-
-    @Override
-    public boolean isAccountNonExpired() {
-        return true;
-    }
-
-    @Override
-    public boolean isAccountNonLocked() {
-        return true;
-    }
-
-    @Override
-    public boolean isCredentialsNonExpired() {
-        return true;
-    }
 
     @Override
     public boolean isEnabled() {
         return enabled;
     }
 
-    public User(String username, String email, String password) {
+    // UserDetails unused properties
+    @Override
+    public boolean isAccountNonExpired() { return true; }
+
+    @Override
+    public boolean isAccountNonLocked() { return true; }
+
+    @Override
+    public boolean isCredentialsNonExpired() {
+        return true;
+    }
+
+    public User(String username, String email, String firstname, String lastname, String password) {
         this.username = username;
         this.email = email;
         this.password = password;
+        this.firstname = firstname;
+        this.lastname = lastname;
     }
 }

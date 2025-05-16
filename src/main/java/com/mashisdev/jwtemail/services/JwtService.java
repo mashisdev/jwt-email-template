@@ -1,5 +1,6 @@
 package com.mashisdev.jwtemail.services;
 
+import com.mashisdev.jwtemail.model.User;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
@@ -66,10 +67,17 @@ public class JwtService {
     }
 
     private String buildToken(Map<String, Object> extraClaims, UserDetails userDetails, long jwtExpiration) {
-            return Jwts
+        String subject;
+        if (userDetails instanceof User user) {
+                subject = user.getEmail();
+            } else {
+                subject = userDetails.getUsername();
+            }
+
+        return Jwts
                     .builder()
                     .setClaims(extraClaims)
-                    .setSubject(userDetails.getUsername())
+                    .setSubject(subject)
                     .setIssuedAt(new Date(System.currentTimeMillis()))
                     .setExpiration(new Date(System.currentTimeMillis() + jwtExpiration))
                     .signWith(getSignInKey(), SignatureAlgorithm.HS256)

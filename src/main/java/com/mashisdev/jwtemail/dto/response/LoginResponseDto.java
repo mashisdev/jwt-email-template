@@ -1,4 +1,4 @@
-package com.mashisdev.jwtemail.dtos.responses;
+package com.mashisdev.jwtemail.dto.response;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;

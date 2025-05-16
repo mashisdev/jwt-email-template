@@ -1,4 +1,4 @@
-package com.mashisdev.jwtemail.dtos.requests;
+package com.mashisdev.jwtemail.dto.request;
 
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;

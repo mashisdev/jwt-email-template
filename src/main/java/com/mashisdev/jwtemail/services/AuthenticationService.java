@@ -1,14 +1,12 @@
 package com.mashisdev.jwtemail.services;
 
-import com.mashisdev.jwtemail.dtos.requests.LoginRequestDto;
-import com.mashisdev.jwtemail.dtos.requests.RegisterRequestDto;
-import com.mashisdev.jwtemail.dtos.requests.VerifyRequestDto;
-import com.mashisdev.jwtemail.entities.User;
-import com.mashisdev.jwtemail.exceptions.auth.AccountNotVerifiedException;
-import com.mashisdev.jwtemail.exceptions.auth.EmailAlreadyExistsException;
-import com.mashisdev.jwtemail.exceptions.auth.UsernameAlreadyExistsException;
-import com.mashisdev.jwtemail.exceptions.auth.WrongEmailOrPasswordException;
-import com.mashisdev.jwtemail.repositories.UserRepository;
+import com.mashisdev.jwtemail.dto.request.LoginRequestDto;
+import com.mashisdev.jwtemail.dto.request.RegisterRequestDto;
+import com.mashisdev.jwtemail.dto.request.VerifyRequestDto;
+import com.mashisdev.jwtemail.exception.auth.*;
+import com.mashisdev.jwtemail.exception.auth.verification.*;
+import com.mashisdev.jwtemail.model.User;
+import com.mashisdev.jwtemail.repository.UserRepository;
 import jakarta.mail.MessagingException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -23,24 +21,30 @@ import java.util.Random;
 @Service
 @RequiredArgsConstructor
 public class AuthenticationService {
+
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
     private final AuthenticationManager authenticationManager;
     private final EmailService emailService;
 
-    // User registration and authentication
+    // User registration
+    public User signup(RegisterRequestDto registerRequestDto) {
 
-    public User signup(RegisterRequestDto input) {
-
-        if(userRepository.existsByEmail(input.getEmail())){
+        if(userRepository.existsByEmail(registerRequestDto.getEmail())){
             throw new EmailAlreadyExistsException("Email is already in use");
         }
 
-        if (userRepository.existsByUsername(input.getUsername())) {
+        if (userRepository.existsByUsername(registerRequestDto.getUsername())) {
             throw new UsernameAlreadyExistsException("Username is already in use");
         }
 
-        User user = new User(input.getUsername(), input.getEmail(), passwordEncoder.encode(input.getPassword()));
+        User user = new User(
+                registerRequestDto.getUsername(),
+                registerRequestDto.getEmail(),
+                registerRequestDto.getFirstname(),
+                registerRequestDto.getLastname(),
+                passwordEncoder.encode(registerRequestDto.getPassword())
+        );
         user.setVerificationCode(generateVerificationCode());
         user.setVerificationCodeExpiresAt(LocalDateTime.now().plusMinutes(30));
         user.setEnabled(false);
@@ -48,12 +52,13 @@ public class AuthenticationService {
         return userRepository.save(user);
     }
 
-    public User authenticate(LoginRequestDto input) {
+    // User authentication
+    public User authenticate(LoginRequestDto loginRequestDto) {
 
-        User user = userRepository.findByEmail(input.getEmail())
+        User user = userRepository.findByEmail(loginRequestDto.getEmail())
                 .orElseThrow(() -> new WrongEmailOrPasswordException("Wrong email or password"));
 
-        if (!passwordEncoder.matches(input.getPassword(), user.getPassword())) {
+        if (!passwordEncoder.matches(loginRequestDto.getPassword(), user.getPassword())) {
             throw new WrongEmailOrPasswordException("Wrong email or password");
         }
 
@@ -63,53 +68,66 @@ public class AuthenticationService {
 
         authenticationManager.authenticate(
                 new UsernamePasswordAuthenticationToken(
-                        input.getEmail(),
-                        input.getPassword()
+                        loginRequestDto.getEmail(),
+                        loginRequestDto.getPassword()
                 )
         );
-
         return user;
     }
 
     // User verification
 
-    public void verifyUser(VerifyRequestDto input) {
-        Optional<User> optionalUser = userRepository.findByEmail(input.getEmail());
-        if (optionalUser.isPresent()) {
-            User user = optionalUser.get();
-            if (user.getVerificationCodeExpiresAt().isBefore(LocalDateTime.now())) {
-                throw new RuntimeException("Verification code has expired");
-            }
-            if (user.getVerificationCode().equals(input.getVerificationCode())) {
-                user.setEnabled(true);
-                user.setVerificationCode(null);
-                user.setVerificationCodeExpiresAt(null);
-                userRepository.save(user);
-            } else {
-                throw new RuntimeException("Invalid verification code");
-            }
-        } else {
-            throw new RuntimeException("User not found");
+    public void verifyUser(VerifyRequestDto verifyRequestDto) {
+        Optional<User> optionalUser = userRepository.findByEmail(verifyRequestDto.getEmail());
+
+        if (optionalUser.isEmpty()) {
+            throw new UserNotFoundException("User not found");
         }
+
+        User user = optionalUser.get();
+
+        if (user.isEnabled()) {
+            throw new AccountAlreadyVerifiedException("Account is already verified");
+        }
+
+        if (!user.getVerificationCode().equals(verifyRequestDto.getVerificationCode())) {
+            throw new InvalidVerificationCodeException("Invalid verification code");
+        }
+        if (user.getVerificationCodeExpiresAt().isBefore(LocalDateTime.now())) {
+            throw new VerificationCodeExpiredException("Verification code has expired");
+        }
+
+        user.setEnabled(true);
+        user.setVerificationCode(null);
+        user.setVerificationCodeExpiresAt(null);
+        userRepository.save(user);
     }
 
-    public void resendVerificationCode(String email) {
-        Optional<User> optionalUser = userRepository.findByEmail(email);
-        if (optionalUser.isPresent()) {
-            User user = optionalUser.get();
-            if (user.isEnabled()) {
-                throw new RuntimeException("Account is already verified");
-            }
-            user.setVerificationCode(generateVerificationCode());
-            user.setVerificationCodeExpiresAt(LocalDateTime.now().plusMinutes(30));
-            sendVerificationEmail(user);
-            userRepository.save(user);
-        } else {
-            throw new RuntimeException("User not found");
+    public void resendVerificationCode(VerifyRequestDto verifyRequestDto) {
+        Optional<User> optionalUser = userRepository.findByEmail(verifyRequestDto.getEmail());
+
+        if (optionalUser.isEmpty()) {
+            throw new UserNotFoundException("User not found");
         }
+
+        User user = optionalUser.get();
+
+        if (user.isEnabled()) {
+            throw new AccountAlreadyVerifiedException("Account is already verified");
+        }
+
+        if (user.getVerificationCodeExpiresAt().isAfter(LocalDateTime.now())) {
+            throw new VerificationCodeStillValidException("Current verification code is still valid");
+        }
+
+        user.setVerificationCode(generateVerificationCode());
+        user.setVerificationCodeExpiresAt(LocalDateTime.now().plusMinutes(30));
+        sendVerificationEmail(user);
+        userRepository.save(user);
     }
+
     private void sendVerificationEmail(User user) {
-        String subject = "Note API Account Verification";
+        String subject = "Jwt Email Account Verification";
         String verificationCode = "VERIFICATION CODE " + user.getVerificationCode();
         String htmlMessage = "<html>"
                 + "<body style=\"font-family: Arial, sans-serif;\">"
@@ -130,9 +148,8 @@ public class AuthenticationService {
             e.printStackTrace();
         }
     }
-    private String generateVerificationCode() {
+    private Integer generateVerificationCode() {
         Random random = new Random();
-        int code = random.nextInt(900000) + 100000;
-        return String.valueOf(code);
+        return random.nextInt(900000) + 100000;
     }
 }

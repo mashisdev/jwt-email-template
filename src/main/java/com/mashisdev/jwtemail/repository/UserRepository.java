@@ -1,6 +1,6 @@
-package com.mashisdev.jwtemail.repositories;
+package com.mashisdev.jwtemail.repository;
 
-import com.mashisdev.jwtemail.entities.User;
+import com.mashisdev.jwtemail.model.User;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 

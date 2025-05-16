@@ -1,4 +1,4 @@
-package com.mashisdev.jwtemail.exceptions.auth;
+package com.mashisdev.jwtemail.exception.auth;
 
 public class EmailAlreadyExistsException extends RuntimeException {
     public EmailAlreadyExistsException(String message) {

@@ -1,6 +1,6 @@
 package com.mashisdev.jwtemail.config;
 
-import com.mashisdev.jwtemail.repositories.UserRepository;
+import com.mashisdev.jwtemail.repository.UserRepository;
 import com.mashisdev.jwtemail.services.UserDetailsServiceImpl;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;

@@ -1,7 +1,7 @@
 package com.mashisdev.jwtemail.services;
 
-import com.mashisdev.jwtemail.entities.User;
-import com.mashisdev.jwtemail.repositories.UserRepository;
+import com.mashisdev.jwtemail.model.User;
+import com.mashisdev.jwtemail.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 

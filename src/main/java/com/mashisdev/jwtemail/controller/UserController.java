@@ -1,6 +1,6 @@
-package com.mashisdev.jwtemail.controllers;
+package com.mashisdev.jwtemail.controller;
 
-import com.mashisdev.jwtemail.entities.User;
+import com.mashisdev.jwtemail.model.User;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -8,7 +8,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-@RequestMapping("/user")
+@RequestMapping("/users")
 @RestController
 public class UserController {
 
@@ -18,4 +18,6 @@ public class UserController {
         User currentUser = (User) authentication.getPrincipal();
         return ResponseEntity.ok(currentUser);
     }
+
+
 }
