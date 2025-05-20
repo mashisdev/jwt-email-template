@@ -1,22 +1,17 @@
 package com.mashisdev.jwtemail.controller;
 
-import com.mashisdev.jwtemail.model.User;
+import com.mashisdev.jwtemail.dto.response.UserDto;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
 
-@RequestMapping("/users")
-@RestController
-public class UserController {
+import java.util.List;
 
-    @GetMapping("/me")
-    public ResponseEntity<User> authenticatedUser() {
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        User currentUser = (User) authentication.getPrincipal();
-        return ResponseEntity.ok(currentUser);
-    }
-    
+public interface UserController {
+
+    ResponseEntity<UserDto> findById(Long id);
+
+    ResponseEntity<List<UserDto>> findAll();
+
+    ResponseEntity<UserDto> update(UserDto userDto);
+
+    ResponseEntity<Void> delete(Long id);
 }

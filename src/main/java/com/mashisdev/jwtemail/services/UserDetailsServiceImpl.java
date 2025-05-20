@@ -1,17 +1,16 @@
 package com.mashisdev.jwtemail.services;
 
-import com.mashisdev.jwtemail.exception.auth.UserNotFoundException;
-import com.mashisdev.jwtemail.repository.UserRepository;
+import com.mashisdev.jwtemail.exception.auth.user.UserNotFoundException;
+import com.mashisdev.jwtemail.repository.SpringJpaRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
-import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 
 @Service
 @RequiredArgsConstructor
 public class UserDetailsServiceImpl implements UserDetailsService {
-    private final UserRepository userRepository;
+    private final SpringJpaRepository userRepository;
     
     @Override
     public UserDetails loadUserByUsername(String email) throws UserNotFoundException {

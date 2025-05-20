@@ -1,5 +1,6 @@
-package com.mashisdev.jwtemail.dto.request;
+package com.mashisdev.jwtemail.dto.request.auth;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.validation.constraints.*;
 import lombok.Getter;
 import lombok.Setter;
@@ -14,5 +15,6 @@ public class VerifyRequestDto {
     @NotNull(message = "Verification code is required")
     @Min(value = 100000, message = "Verification code must be a 6-digit number")
     @Max(value = 999999, message = "Verification code must be a 6-digit number")
+    @JsonProperty("verification_code")
     private Integer verificationCode;
 }

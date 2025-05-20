@@ -1,6 +1,9 @@
 package com.mashisdev.jwtemail.exception;
 
-import com.mashisdev.jwtemail.exception.auth.*;
+import com.mashisdev.jwtemail.exception.auth.user.EmailAlreadyExistsException;
+import com.mashisdev.jwtemail.exception.auth.user.UserNotFoundException;
+import com.mashisdev.jwtemail.exception.auth.user.UsernameAlreadyExistsException;
+import com.mashisdev.jwtemail.exception.auth.user.WrongEmailOrPasswordException;
 import com.mashisdev.jwtemail.exception.auth.verification.*;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;

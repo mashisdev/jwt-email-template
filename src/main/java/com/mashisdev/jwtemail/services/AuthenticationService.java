@@ -1,14 +1,25 @@
 package com.mashisdev.jwtemail.services;
 
-import com.mashisdev.jwtemail.dto.request.LoginRequestDto;
-import com.mashisdev.jwtemail.dto.request.RegisterRequestDto;
-import com.mashisdev.jwtemail.dto.request.VerifyRequestDto;
-import com.mashisdev.jwtemail.exception.auth.*;
+import com.mashisdev.jwtemail.dto.request.auth.LoginRequestDto;
+import com.mashisdev.jwtemail.dto.request.auth.RegisterRequestDto;
+import com.mashisdev.jwtemail.dto.request.auth.VerifyRequestDto;
+import com.mashisdev.jwtemail.dto.request.user.UpdateUserDto;
+import com.mashisdev.jwtemail.dto.response.LoginResponseDto;
+import com.mashisdev.jwtemail.dto.response.UserDto;
+import com.mashisdev.jwtemail.exception.auth.user.EmailAlreadyExistsException;
+import com.mashisdev.jwtemail.exception.auth.user.UserNotFoundException;
+import com.mashisdev.jwtemail.exception.auth.user.UsernameAlreadyExistsException;
+import com.mashisdev.jwtemail.exception.auth.user.WrongEmailOrPasswordException;
 import com.mashisdev.jwtemail.exception.auth.verification.*;
+import com.mashisdev.jwtemail.mapper.UserMapper;
+import com.mashisdev.jwtemail.model.Role;
 import com.mashisdev.jwtemail.model.User;
+import com.mashisdev.jwtemail.model.UserEntity;
+import com.mashisdev.jwtemail.repository.SpringJpaRepository;
 import com.mashisdev.jwtemail.repository.UserRepository;
 import jakarta.mail.MessagingException;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -26,34 +37,32 @@ public class AuthenticationService {
     private final PasswordEncoder passwordEncoder;
     private final AuthenticationManager authenticationManager;
     private final EmailService emailService;
+    private final JwtService jwtService;
+    private final UserMapper userMapper;
+
+    public static ResponseEntity<LoginResponseDto> refreshToken(String authHeader) {
+        return null;
+    }
 
     // User registration
-    public User signup(RegisterRequestDto registerRequestDto) {
+    public User register(User user) {
 
-        if(userRepository.existsByEmail(registerRequestDto.getEmail())){
+        if(userRepository.existsByEmail(user.getEmail())){
             throw new EmailAlreadyExistsException("Email is already in use");
         }
 
-        if (userRepository.existsByUsername(registerRequestDto.getUsername())) {
-            throw new UsernameAlreadyExistsException("Username is already in use");
-        }
-
-        User user = new User(
-                registerRequestDto.getUsername(),
-                registerRequestDto.getEmail(),
-                registerRequestDto.getFirstname(),
-                registerRequestDto.getLastname(),
-                passwordEncoder.encode(registerRequestDto.getPassword())
-        );
+        user.setPassword(passwordEncoder.encode(user.getPassword()));
+        user.setRole(Role.USER);
+        user.setEnabled(false);
         user.setVerificationCode(generateVerificationCode());
         user.setVerificationCodeExpiresAt(LocalDateTime.now().plusMinutes(30));
-        user.setEnabled(false);
+
         sendVerificationEmail(user);
         return userRepository.save(user);
     }
 
     // User authentication
-    public User authenticate(LoginRequestDto loginRequestDto) {
+    public LoginResponseDto authenticate(LoginRequestDto loginRequestDto) {
 
         User user = userRepository.findByEmail(loginRequestDto.getEmail())
                 .orElseThrow(() -> new WrongEmailOrPasswordException("Wrong email or password"));
@@ -72,7 +81,12 @@ public class AuthenticationService {
                         loginRequestDto.getPassword()
                 )
         );
-        return user;
+
+        UserEntity userEntity = userMapper.userToUserEntity(user);
+
+        String jwtToken = jwtService.generateToken(userEntity);
+
+        return LoginResponseDto.builder().token(jwtToken).build();
     }
 
     // User verification

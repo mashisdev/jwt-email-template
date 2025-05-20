@@ -3,18 +3,18 @@ package com.mashisdev.jwtemail.services;
 import com.mashisdev.jwtemail.model.User;
 import org.springframework.stereotype.Service;
 
-import java.util.Optional;
+import java.util.List;
+import java.util.UUID;
 
 @Service
 public interface UserService {
 
-    boolean existsByUsername(String username);
+    User findById(UUID id);
 
-    boolean existsByEmail(String email);
+    List<User> findAll();
 
-    void save(User user);
+    User update(User user);
 
-    Optional<User> findByEmail(String email);
+    void delete(UUID id);
 
-    Optional<User> findByUsername(String username);
 }

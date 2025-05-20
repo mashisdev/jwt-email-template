@@ -1,15 +1,22 @@
 package com.mashisdev.jwtemail.repository;
 
 import com.mashisdev.jwtemail.model.User;
-import org.springframework.data.jpa.repository.JpaRepository;
-import org.springframework.stereotype.Repository;
 
+import java.util.List;
 import java.util.Optional;
+import java.util.UUID;
 
-@Repository
-public interface UserRepository extends JpaRepository<User,Integer> {
+public interface UserRepository {
+
+    User save(User userEntity);
+
+    Optional<User> findById(UUID id);
+
+    List<User> findAll();
+
     Optional<User> findByEmail(String email);
-    Optional<User> findByUsername(String username);
-    Boolean existsByUsername(String username);
+
     Boolean existsByEmail(String email);
+
+    void deleteById(UUID id);
 }
